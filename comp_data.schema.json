@@ -1,0 +1,559 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "comp_data — input contract for build_workbook.py",
+  "description": "The agent assembles this from VERIFIED comp data only. build_workbook.py owns all workbook structure/formatting. See comp_data.example.json for a filled example (10 Lower Spadina).",
+  "type": "object",
+  "required": [
+    "subject",
+    "levers",
+    "comp_buildings",
+    "condo_rows",
+    "apartment_rows",
+    "floor_plans"
+  ],
+  "properties": {
+    "subject": {
+      "type": "object",
+      "required": [
+        "name",
+        "title_full",
+        "address",
+        "product",
+        "primary_building",
+        "group_label"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Marketing name, used in titles/output filename."
+        },
+        "title_full": {
+          "type": "string",
+          "description": "Upper-case banner name for the Output title."
+        },
+        "address": {
+          "type": "string"
+        },
+        "area_label": {
+          "type": "string",
+          "description": "e.g. 'Waterfront / C01'"
+        },
+        "city_label": {
+          "type": "string"
+        },
+        "district": {
+          "type": "string",
+          "description": "TRREB district label, e.g. 'Toronto C01'."
+        },
+        "product": {
+          "type": "string",
+          "enum": [
+            "Condo",
+            "Apartment"
+          ],
+          "description": "Subject product type (sets premium direction)."
+        },
+        "suites": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "storeys": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "pre-construction | resale/built"
+        },
+        "vipcondos_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "group_label": {
+          "type": "string",
+          "description": "Output Group-1 market label, e.g. 'Lower Spadina / CityPlace Waterfront'."
+        },
+        "primary_building": {
+          "type": "string",
+          "description": "Newest/primary comp building name (drives by-bedroom-primary + PREMIUM BASIS newest)."
+        },
+        "oldest_building": {
+          "type": "string",
+          "description": "Oldest comp building name (PREMIUM BASIS oldest)."
+        },
+        "prior_model": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Prior-model subject $/SF, or null for a new subject."
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "levers": {
+      "type": "object",
+      "required": [
+        "date_filter",
+        "parking_adj",
+        "apt_premium",
+        "subject_mix_output",
+        "subject_mix_manual"
+      ],
+      "properties": {
+        "date_filter": {
+          "type": "string",
+          "description": "ISO date YYYY-MM-DD; include leases on/after (C1)."
+        },
+        "parking_adj": {
+          "type": "object",
+          "required": [
+            "value",
+            "note"
+          ],
+          "description": "C2 — HARD-CODED $/spot/mo from area parking comps (no LINEST). Note names the comps/delta.",
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "apt_premium": {
+          "type": "object",
+          "required": [
+            "value",
+            "note"
+          ],
+          "description": "C3 — apartment→condo $/SF markup; 0 + off:true when no apartment comps.",
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "off": {
+              "type": "boolean"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "subject_mix_output": {
+          "type": "object",
+          "required": [
+            "suite_count",
+            "1BR",
+            "1+Den",
+            "2BR",
+            "3BR"
+          ],
+          "description": "Output building-total mix (T2:T6); shares should sum to ~1.0.",
+          "properties": {
+            "suite_count": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "1BR": {
+              "type": "number"
+            },
+            "1+Den": {
+              "type": "number"
+            },
+            "2BR": {
+              "type": "number"
+            },
+            "3BR": {
+              "type": "number"
+            },
+            "suite_count_note": {
+              "type": "string"
+            },
+            "mix_note": {
+              "type": "string"
+            }
+          }
+        },
+        "subject_mix_manual": {
+          "type": "object",
+          "required": [
+            "1BR",
+            "2BR",
+            "3BR",
+            "source"
+          ],
+          "description": "H2:H4 fallback (Q8:Q10) used when the subject has no tagged (SUBJECT) floor plans. Den-incl 1BR/2BR/3BR.",
+          "properties": {
+            "1BR": {
+              "type": "number"
+            },
+            "2BR": {
+              "type": "number"
+            },
+            "3BR": {
+              "type": "number"
+            },
+            "source": {
+              "type": "string",
+              "description": "Required source note (Q7). Best: 'user-provided {date}'; else developer/planned mix."
+            }
+          }
+        },
+        "subject_premium": {
+          "type": "object",
+          "required": [
+            "value",
+            "source"
+          ],
+          "description": "C4 fallback. C4 is normally DERIVED off PREMIUM BASIS (vintage spread). When the comp set is single-/equal-vintage there is no spread, so C4 falls back to this sourced premium. Optional; omit for multi-vintage sets.",
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "source": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "trreb": {
+      "type": "object",
+      "description": "Read from the TRREB Rental Market Report this session; omit/blank rather than invent.",
+      "properties": {
+        "quarter_label": {
+          "type": "string"
+        },
+        "district_label": {
+          "type": "string"
+        },
+        "district": {
+          "type": "object"
+        },
+        "city": {
+          "type": "object"
+        },
+        "yoy": {
+          "type": "object"
+        }
+      }
+    },
+    "comp_buildings": {
+      "type": "array",
+      "description": "One per comp building, in display order (primary/newest first).",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "address",
+          "yr_built",
+          "product"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "developer": {
+            "type": "string"
+          },
+          "first_occ": {},
+          "yr_built": {},
+          "product": {
+            "type": "string",
+            "enum": [
+              "Condo",
+              "Apartment"
+            ]
+          },
+          "storeys": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "units": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "other_excluded_prose": {
+      "type": "string",
+      "description": "Evaluated-and-excluded buildings, prose; newline-separated lines. No /10 scores."
+    },
+    "condo_rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/rd_row"
+      }
+    },
+    "apartment_rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/rd_row"
+      }
+    },
+    "floor_plans": {
+      "type": "array",
+      "description": "One row per distinct VIPcondos plan opened this session; subject plans tagged '(SUBJECT)' in building.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "building": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "subject",
+              "comp"
+            ]
+          },
+          "source_site": {
+            "type": "string"
+          },
+          "source_url": {
+            "type": "string"
+          },
+          "date_read": {
+            "type": "string"
+          },
+          "plan_name": {
+            "type": "string"
+          },
+          "beds": {},
+          "baths": {},
+          "interior_sf": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "exposure": {
+            "type": "string"
+          },
+          "floor_band": {
+            "type": "string"
+          },
+          "stack": {
+            "type": "string"
+          },
+          "balcony": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "used_for": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "rd_row": {
+      "type": "object",
+      "description": "One Raw-Data lease/listing row. B (sqft) must be a VERIFIED exact interior SF or null (exact-or-blank). Formula columns (Include/Adj/$psf/etc.) are generated, NOT supplied.",
+      "required": [
+        "building",
+        "leased_rent"
+      ],
+      "properties": {
+        "sqft": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Verified exact interior SF, or null. Never a range/guess."
+        },
+        "date": {
+          "type": "string",
+          "description": "Lease/transaction date YYYY-MM-DD (col J — drives the C1 window)."
+        },
+        "building": {
+          "type": "string"
+        },
+        "building_address": {
+          "type": "string"
+        },
+        "building_city": {
+          "type": "string"
+        },
+        "developer": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "unit_address": {
+          "type": "string"
+        },
+        "beds": {
+          "type": "string",
+          "description": "e.g. '1','2','3','1+1' (den). Drives G/H/I derivation."
+        },
+        "baths": {},
+        "sqft_condosca": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "mls_range": {
+          "type": "string",
+          "description": "'<lo>-<hi> sqft'."
+        },
+        "parking": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "parking_incl": {
+          "type": "string"
+        },
+        "locker": {
+          "type": "string"
+        },
+        "outdoor": {
+          "type": "string"
+        },
+        "exposure": {
+          "type": "string"
+        },
+        "building_age": {
+          "type": "string",
+          "description": "'Built YYYY (N yrs)'."
+        },
+        "amenities": {
+          "type": "string"
+        },
+        "leased_rent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Achieved rent (AB). Drives included $/SF."
+        },
+        "listed_rent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Asking/listed rent (AC)."
+        },
+        "furnished": {
+          "type": "string"
+        },
+        "hydro": {
+          "type": "string"
+        },
+        "water": {
+          "type": "string"
+        },
+        "lease_date": {
+          "type": "string"
+        },
+        "mls": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string",
+          "description": "What was seen + how SF was obtained when not green."
+        },
+        "product_type": {
+          "type": "string",
+          "enum": [
+            "Condo",
+            "Apartment"
+          ]
+        },
+        "date_scraped": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "green",
+            "cream",
+            "orange",
+            null
+          ],
+          "description": "green=leased in-window+SF verified; cream=active/older/caveat/apartment asking; orange=excluded partial."
+        },
+        "sf_blank": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "REQUIRED for any row with a leased rent in the C1 window but sqft=null. Documents the SF-resolution ladder so a bounded-effort blank cannot masquerade as a genuinely-exhausted one. validate_workbook.py FAILS a leased-in-window blank row that lacks this. Omit when sqft is populated. 'No vipcondos card' alone is NOT acceptable — the unit's own condos.ca page and the building key-plates must have been tried first.",
+          "required": [
+            "condosca_page",
+            "keyplate",
+            "outcome"
+          ],
+          "properties": {
+            "condosca_page": {
+              "type": "string",
+              "description": "The unit's OWN condos.ca page opened this session + what its registered area showed (e.g. 'opened; no NNN sqft* printed' or 'NNN sqft* fell outside the MLS bracket — rejected')."
+            },
+            "keyplate": {
+              "type": "string",
+              "description": "Route A key-plate / stacking-diagram attempt + outcome (e.g. 'checked M2M tower-A plate; 3 candidate plans — unresolved'), or why unavailable ('no readable key-plate on vipcondos')."
+            },
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "unresolved-candidates",
+                "conflict-outside-bracket",
+                "cross-tower-ambiguous",
+                "no-source-readable",
+                "excluded-non-sf"
+              ],
+              "description": "Why the ladder ended in a blank after condos.ca page + key-plate were tried. 'excluded-non-sf' = the row is excluded for a reason OTHER than SF (room-by-room partial, furnished/short-term rent outlier), so SF was not pursued — still record it so the blank is demonstrably intentional, not bounded effort."
+            }
+          }
+        }
+      }
+    }
+  }
+}
