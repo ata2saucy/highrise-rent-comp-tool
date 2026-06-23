@@ -731,6 +731,21 @@ formats); the generator removes that failure mode and is deterministic.
    exhaustion record, so a silent leased-in-window blank FAILs. Deliver only on a
    green **PASS**. (Output ships with `fullCalcOnLoad`, so Excel recalculates values on open; if
    LibreOffice `soffice` is available you may also headless-recalc, but it is not required.)
+4. **Quality gate (run after the validator PASSes):**
+   `python quality_agent.py comp_data.json "{Building} … .xlsx"`
+   — `validate_workbook.py` proves the workbook is **internally correct**; `quality_agent.py`
+   asks whether the **comp set is good enough to trust the recommendation**. It flags the thin /
+   anomalous data a correct-but-weak run hides: **low transaction counts** (overall, per comp
+   building, and per subject-mix bed type), **low SF-verified coverage**, **$/SF and rent
+   outliers** (sane-band + per-building/bed MAD), **out-of-band derived premiums** (C4/C3),
+   **under-pulled date windows**, **duplicate leases**, and a **missing TRREB** table. It returns
+   one of three verdicts (exit code): **PASS** (0) deliver · **REVIEW** (2) deliver **but surface
+   every `[REVIEW]` caveat in the writeup / verification log** · **RERUN** (1) the set is too
+   thin/anomalous to deliver — **do the listed `[RERUN]` actions** (widen C1, re-pull a building's
+   full history, add/replace a thin comp, resolve more SF, drop a bad outlier), then **regenerate →
+   re-validate → re-run this gate.** Thresholds are tunable constants at the top of the script.
+   **Do not deliver a workbook the quality agent returned RERUN on** — treat it exactly like a
+   validator FAIL. A RERUN is a signal to redo the work, not to override the gate.
 
 The per-sheet spec below is the **reference** for what the generator emits (and therefore what
 `comp_data.json` must feed) — read it to understand the format or to extend the generator, **not**
