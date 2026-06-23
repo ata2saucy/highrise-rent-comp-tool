@@ -287,7 +287,7 @@ If the subject building has **no rentals/plans of its own** (e.g. pre-constructi
    before asking is out of order.
 1. **Search the area on BOTH tracks — condo *and* PBR — because they live in different databases:**
    - **Condos:** vipcondos "Nearby Market" + condos.ca neighbourhood.
-   - **PBR / purpose-built rentals:** **condos.ca and vipcondos do NOT list purpose-built rentals**, so searching only them always returns zero PBRs — that is *why* PBRs "aren't being found." Find PBR candidates on the **authorized apartment sources + a map**: Apartments.com, rentals.ca, PadMapper, Zumper, Liv.rent, the building / property-manager pages, and a map search ("apartments near {address}", plus the large operators'/REITs' portfolios). **The area search is not finished until this PBR track has been run** — "no PBRs nearby" is a valid finding *only after* the apartment-source/map search, never after a condo-only search.
+   - **PBR / purpose-built rentals:** **condos.ca and vipcondos do NOT list purpose-built rentals**, so searching only them always returns zero PBRs — that is *why* PBRs "aren't being found." **When searching for PBR rentals, find them on Apartments.com's Canadian site** (apartments.com — use its Canada / Toronto listings, NOT the US results) as the primary stop, then the other **authorized apartment sources + a map**: rentals.ca, PadMapper, Zumper, Liv.rent, the building / property-manager pages, and a map search ("apartments near {address}", plus the large operators'/REITs' portfolios). **The area search is not finished until this PBR track has been run** — "no PBRs nearby" is a valid finding *only after* the apartment-source/map search, never after a condo-only search.
 
    **We want PBR comps even when the subject is a condo.** They are bridged up to condo-equivalent by the C3 premium, and a real condo-vs-PBR $/SF pairing is what lets C3 be **derived** (the live APARTMENT PREMIUM BASIS block) instead of falling back to a guessed external figure. Do **not** skip the PBR track because the subject is a condo, and do **not** drop a PBR comp just because it ends up asking-only (`Include = 0`) — keep it on `RD Apartments` for the premium basis and the apartments Output view.
 2. **Shortlist and rank each candidate against the subject as you established it** in Step 0 **and the three intake answers** (development type, suite mix, pre-con/resale) — **by:** (a) **year built / expected year built** — closest to the subject (for a new build, the newest nearby is primary; older sets a floor); (b) **product type — condo vs purpose-built rental apartment** (keep labelled); (c) proximity; (d) rental depth (enough leased records — skip ~0-activity buildings) — **but for a PBR, judge depth on the apartment sources' active listings / availability, NOT condos.ca, which doesn't track PBR leases; never skip a PBR as "0 activity" just because condos.ca shows nothing**. Rank by this judgment; **do not reduce it to a numeric score** (no /10 rating — removed 2026-06-16).
@@ -422,6 +422,12 @@ apartment **rent and listing** data, and it is **bounded by three rules:**
 
 Anything outside this set (other aggregators/portals) exists **only** as a Route A fallback when
 vipcondos has no readable plan — see the method doc — and is **never** a source of condo comp data.
+**Floor-plan fallback (added 2026-06-23): when neither vipcondos nor condos.ca has a readable floor
+plan for a unit/building, try TalkCondo (talkcondo.com) BEFORE blanking the SF** — it frequently hosts
+the developer's plan set / suite sizes. TalkCondo is a **plan-read fallback only** (never a source of
+rents or comp data), and any SF read there still clears the exact-or-blank bar (lands in the unit's
+MLS bracket, read this session). Only after vipcondos → condos.ca → TalkCondo all fail is the SF an
+honest blank.
 All sources are sources, not oracles — every number still clears the full verification bar.
 
 Arkfield's SharePoint (`_AI`) is **not** a third comp source: in the `_AI` batch mode it
@@ -566,10 +572,15 @@ is a trigger to climb the ladder, **per unit** (not just per building):
    **plate**, not by beds + baths + bracket alone — which correctly stays blank. **For a
    multi-tower development, use the correct *tower's* plate** (see "Multi-tower / multi-address
    rule") — pull every tower's plans first.
-4. **Only after 1–3 fail** (multiple candidate plans / an exact area that falls *outside* the
-   bracket / cross-tower-ambiguous with no prefix / no readable source) → **BLANK, `Include = 0`**,
-   and the row's Description **records which routes were tried and the outcome** — this is the
-   structured `sf_blank` record the validator checks (see "Output format" and `comp_data.schema.json`).
+4. **Still none → TalkCondo fallback (added 2026-06-23):** when neither vipcondos nor condos.ca
+   yields a readable plan, **try TalkCondo (talkcondo.com)** for the developer floor plan / suite
+   size before blanking — a plan-read fallback only (never rents/comp data), and any SF read there
+   must still land in the unit's MLS bracket (read this session).
+5. **Only after 1–4 fail** (multiple candidate plans / an exact area that falls *outside* the
+   bracket / cross-tower-ambiguous with no prefix / no readable source on vipcondos, condos.ca, or
+   TalkCondo) → **BLANK, `Include = 0`**, and the row's Description **records which routes were
+   tried and the outcome** — this is the structured `sf_blank` record the validator checks (see
+   "Output format" and `comp_data.schema.json`).
 
 **If condos.ca has NO per-unit registered area** (unregistered building, brand-new corp):
 say so explicitly in each row's Description and switch that building to **Route A — get the
