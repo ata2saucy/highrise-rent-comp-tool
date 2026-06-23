@@ -20,11 +20,13 @@ source of condo comp data.
 **Apartment-comp sources (apartment rows only):** purpose-built rental apartments mostly aren't on
 condos.ca, so for **apartment rent/listing data** you may also use **Apartments.com + reputable
 Canadian rental sites** (rentals.ca, PadMapper, Zumper, Liv.rent) **and the building's own /
-property-manager pages.** This is **only** for apartment rent/listing data — those sources never
-supply condo comps and **never supply any SF figure.** All interior-SF verification stays on
-**plans** (vipcondos / developer plans / the apartment building's own published suite floor plans
-or a registered area), and apartment SF clears the **same strict exact-or-blank bar** — absent a
-verified plan, an apartment row carries asking $/SF only and stays `Include = 0`. Apartment asking
+property-manager pages.** Those sources never supply condo comps. **Apartment-comp practice
+(updated 2026-06-23): go straight to Apartments.com (Canadian site) as the main PBR source,
+navigate the actual listing, and take the suite SF directly from that listing — there is NO
+floor-plan step for PBR.** Then cross-check the project's **own** website to see whether it leases
+at the same price as Apartments.com or is running **special incentives** (months free, etc.); note
+any gap. **Condos keep the strict exact-or-blank, verified-source SF bar (plans / registered
+areas); the listing-stated-SF relaxation is apartment-only.** Apartment asking
 rents are recorded as **Listed Rent** (achieved leased rent, where known, as **Leased Rent**) so
 the "selling as vs sold for" gap stays visible. Condos
 and apartments are kept on **separate Raw Data sheets** (`RD Condos` / `RD Apartments`, RD = Raw

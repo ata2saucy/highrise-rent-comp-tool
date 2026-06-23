@@ -318,9 +318,11 @@ If the subject building has **no rentals/plans of its own** (e.g. pre-constructi
 4. **Run the comps process only on the user-selected buildings** — per-unit SF verification,
    leased history, workbook build. **Route by product type:** condo buildings → condos.ca/vipcondos
    → `RD Condos` → the condos Output view; purpose-built apartment buildings → the
-   authorized apartment sources (Apartments.com + CA rental sites + building/property-manager pages)
-   for rent/listing data, plans for SF → `RD Apartments` → the apartments Output view.
-   Same strict exact-or-blank SF bar on both (see Apartment vs condo handling).
+   authorized apartment sources (Apartments.com Canadian site first, navigated directly — then CA
+   rental sites + building/property-manager pages) for rent/listing data, **with SF taken straight
+   from the listing (no floor-plan step for PBR)** → `RD Apartments` → the apartments Output view.
+   **Condos keep the strict exact-or-blank, verified-source SF bar; PBR SF is the listing-stated
+   size** (see Apartment vs condo handling).
 5. **Apartment premium:** condos rent at a premium to purpose-built apartments of a comparable year built. Whenever a comp's product type differs from the subject's, bridge the gap with this premium — for a **condo subject**, mark an **apartment** comp's $/SF **up** to condo-equivalent; for a **PBR subject**, bring a **condo** comp's $/SF **down** to PBR-equivalent (same lever, direction set by the subject — see "What we're doing"). It is documented and tunable, **anchored to the live APARTMENT PREMIUM BASIS block** (Data_Summary!C3 — derived from the condo-vs-apartment $/SF pairing when both product types are in the set, else a named external source; never a bare guess) so it's comparable — shown in the apartments view, never silently merged into the condos view. Keep it in an assumption cell, never buried in a formula.
 6. **Document the shortlist AND every reject** (why in/out) — log each evaluated-and-excluded
    building **by name with its objective reject reason** in the Output → "Other Excluded" block.
@@ -411,10 +413,13 @@ apartments mostly aren't on condos.ca, so for **apartment** rent/listing data yo
 **and the building's own / property-manager listing pages.** This carve-out is **only** for
 apartment **rent and listing** data, and it is **bounded by three rules:**
 1. **It never applies to condos.** Condo comps and condo identity stay on condos.ca + vipcondos.
-2. **It never lowers the SF bar.** Interior SF for an apartment row clears the **same strict
-   exact-or-blank standard** as a condo (a verified floor-plan / registered area — *not* an ad's
-   advertised number taken on faith). No verified exact interior SF ⇒ SF blank, row excluded
-   from $/SF (see "Apartment vs condo handling" under the workflow).
+2. **PBR SF comes straight from the listing — no floor-plan step (updated 2026-06-23).** For an
+   apartment row, take the interior SF **directly from the apartment listing** (Apartments.com /
+   the building's own page) and record it with that source — a separate floor-plan / key-plate
+   verification is **not** required for PBR. This relaxation is **apartment-only**; **condos keep
+   the strict exact-or-blank, verified-source SF bar** (never an advertised number). No size on
+   the listing ⇒ apartment SF blank. The listing-stated SF gives the apartment asking $/SF (see
+   "Apartment vs condo handling").
 3. **Asking vs achieved is labelled.** These sources usually publish the **asking / listed** rent,
    not what the unit actually leased for. Record it as the **Listed Rent**; where an achieved
    (leased) figure exists, record that as the **Leased Rent** — the workbook surfaces the gap
@@ -463,13 +468,19 @@ the subject's own product type is always the Option-2 "as-is, no-premium" comp (
 we're doing"). When you build a PBR-subject workbook, invert the cross-product bridge
 accordingly rather than copying the condo-subject formula blindly.
 
-- **The apartment comp pull (parallels the condo Route B pull).** For each selected apartment
-  building: open its current listings on the authorized apartment sources (Apartments.com /
-  rentals.ca / PadMapper / Zumper / Liv.rent / the building's own or property-manager page),
-  record each unit's **asking rent → Listed Rent**, beds/baths, parking, and the **Listing URL
-  opened this session** + a Description of what was seen. Achieved (leased) rent is usually **not**
-  published for apartments — leave **Leased Rent** blank unless a confirmed figure exists. Get SF
-  from a verified plan (per the SF bullet below); no plan ⇒ asking $/SF only, `Include = 0`.
+- **The apartment comp pull — Apartments.com first, navigated directly, then the building's own
+  site as an incentive cross-check.** For each selected PBR/apartment building: **go straight to
+  the building's Apartments.com (Canadian site) listing and work through the actual page in-browser**
+  (don't rely on search snippets) to record each suite's **asking rent → Listed Rent**, beds/baths,
+  parking, the **interior SF stated on the listing** (no floor-plan step — see the SF bullet), the
+  **Listing URL opened this session**, and a Description of what was seen. **Then open the project's
+  OWN website and compare:** does it lease at the **same price as Apartments.com**, or is the
+  own-site rate different because of **special incentives** (e.g. "X months free," gift cards, a
+  lower headline rent)? Record the Apartments.com asking as the comp, and **note any own-site
+  incentive / price gap in the Description** so a promotional rate isn't mistaken for the true
+  market asking. Achieved (leased) rent is usually **not** published — leave **Leased Rent** blank
+  unless a confirmed figure exists (asking-only rows stay `Include = 0`). rentals.ca / PadMapper /
+  Zumper / Liv.rent are secondary fallbacks if the building isn't on Apartments.com.
 - **Separate Raw Data sheets, identical structure.** Condo comp rows live on **`RD Condos`**;
   apartment comp rows on **`RD Apartments`** (RD = Raw Data). Both sheets are **identical in
   columns and data structure** — the same 40 columns A:AN, same freeze row 1, same live formulas
@@ -478,21 +489,23 @@ accordingly rather than copying the condo-subject formula blindly.
   apartments-only** — same grouped layout, each rolling up from its own Raw Data sheet. (Default
   is the summary blocks, matching the existing format; if you want a graphical chart, drop a
   `$/SF` bar/scatter beside each view — the structure supports it.)
-- **Same strict SF bar on both.** Apartment interior SF clears the **same exact-or-blank
-  standard** as condos — a verified floor-plan / registered area, **never** an ad's advertised
-  number taken on faith. No verified exact interior SF ⇒ SF blank, `Include = 0`, row excluded
-  from every $/SF and average.
-- **Where apartment SF legitimately comes from.** The authorized apartment **rent** sources are
-  barred from supplying SF, and purpose-built apartments usually aren't on vipcondos either — so a
-  verified apartment SF comes from **the building's own published suite floor plans / a developer
-  suite-area schedule read in-browser**, or a **registered area** where the building has one.
-  **Be explicit about the practical consequence:** absent such a verified plan, an apartment row
-  carries its **asking $/SF only** and stays `Include = 0` (excluded from $/SF) — it is **not** a
-  licence to accept the advertised number. Expect many apartment rows to sit at asking-only.
+- **SF bar differs by product (updated 2026-06-23 — no floor-plan step for PBR).** **Condos** keep
+  the strict exact-or-blank, verified-source SF bar (registered area / verified plan; never an
+  advertised number). **PBR/apartments do NOT require a floor-plan step** — take the suite's
+  interior SF **directly from the Apartments.com listing** (or the building's own page) and record
+  it with that source; where the listing states no size, the SF is blank. The listing-stated SF is
+  the apartment row's SF — confidence **cream**, Description noting "listing-stated SF
+  (Apartments.com)".
+- **What the apartment SF feeds.** The listing SF drives the apartment **asking $/SF** (`PSF
+  (Listing)`), which populates the apartments Output view and the APARTMENT PREMIUM BASIS (C3).
+  Asking-only rows (no confirmed leased/achieved rent) still stay `Include = 0` in the leased-$/SF
+  logic — the relaxation gives PBR a usable asking $/SF, not a leased one.
 - **Only the rent/listing source differs.** Condo rent data comes from condos.ca; apartment rent
-  data may also come from the authorized apartment sources (Apartments.com + reputable Canadian
-  rental sites + the building / property-manager pages — see "The two websites"). SF verification
-  for both still runs on plans (vipcondos / developer plans / a registered area).
+  data comes primarily from **Apartments.com (Canadian site)**, navigated directly, then the other
+  authorized apartment sources (rentals.ca / PadMapper / Zumper / Liv.rent / the building /
+  property-manager pages — see "The two websites"), cross-checked against the building's own site
+  for incentives. **Condo SF runs on plans / registered areas; PBR SF is the listing-stated size
+  (no floor-plan step) — see the SF bullet above.**
 - **"Selling as vs sold for" — listed vs leased is explicit.** Record the **asking / listed** rent
   in **Listed Rent ($)** and the **achieved / leased** rent in **Leased Rent ($)**; the workbook
   and **both** Output views surface the **gap** between what a unit is *listed* at and what it
@@ -921,8 +934,9 @@ item 5):
    "selling as vs sold for." For apartment rows from the authorized apartment sources, the asking
    rent goes in **Listed Rent (AC)**; leave **Leased Rent (AB)** blank unless an achieved figure
    is confirmed (so such rows carry asking $/SF but `Include = 0` until a leased rent + verified
-   SF exist). **Same strict SF bar on both sheets** — col B is a verified exact interior SF or
-   blank; never an advertised ad number on faith. Row order on each sheet: in-window leases
+   SF exist). **SF bar by product** — on `RD Condos`, col B is a verified exact interior SF or
+   blank (never an advertised number); on `RD Apartments`, col B is the **listing-stated interior
+   SF** (taken from Apartments.com / the building's page — no floor-plan step) or blank. Row order on each sheet: in-window leases
    (newest first) → older leases → actives → excluded partials. Every row carries MLS# (where
    one exists), the **Listing URL opened this session**, and a Description stating what was seen.
    **Wherever a row's SF is not green** (i.e. not a verified leased-in-window per-unit figure),
@@ -1017,7 +1031,7 @@ encodes and the validator enforces (kept here as the human-readable reference):
 - Do **not** start finding comps (area search, shortlist, or any pull) before asking the three subject-intake questions — development type, **suite mix**, and pre-construction vs resale (see the address-first kickoff). Ask first, then find comps.
 - Do **not** pull per-unit comps for a comp-building set the user hasn't confirmed — shortlist first, user picks, then comps (see Comp-building selection).
 - Do **not** blend condos and apartments into one sheet, one average, or one Output view — keep them on `RD Condos` / `RD Apartments` and in their own Output views (see Apartment vs condo handling).
-- Do **not** use the apartment sources (Apartments.com / CA rental sites) for condo comps, for any interior-SF figure, or as licence to accept an advertised SF on faith — the carve-out is apartment **rent/listing data only**, and the strict exact-or-blank SF bar still applies.
+- Do **not** use the apartment sources (Apartments.com / CA rental sites) for **condo** comps or any **condo** SF figure — condos keep the strict exact-or-blank, verified-source SF bar (never an advertised number). **(PBR/apartment SF is the exception: take it straight from the apartment listing — no floor-plan step — see "Apartment vs condo handling.")**
 - Do **not** report an apartment's asking/listed rent as if it were an achieved/leased rent — record asking in Listed Rent, achieved in Leased Rent, and keep the "selling as vs sold for" gap visible.
 - Do **not** apply the apartment/condo premium (C3) twice — it lives once in RD Apartments col AN; the apartments Output view reads AN and must not re-multiply by (1+C3).
 - Do **not** type the subject premium C4 — it is a **live formula** off PREMIUM BASIS (`=(C61+C62)/2`, the midpoint of the observed vintage premiums), with a documented fallback to the sourced `levers.subject_premium` **only** when the comp set is single-/equal-vintage and the spread is degenerate (C61=C62=0). Do **not** enter C3 (apartment premium) as a bare guess — anchor it to APARTMENT PREMIUM BASIS, else a named external source. A premium with no shown derivation is a defect.
