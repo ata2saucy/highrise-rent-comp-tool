@@ -1,5 +1,13 @@
 # CLAUDE.md — High-Rise Rent-Comp & Price-Triangulation Tool (Condo + PBR)
 
+> **In plain English:** This tool figures out what rent a new condo or apartment building
+> should be able to charge. It does that by finding similar nearby buildings, looking up what
+> their units actually rent for, carefully checking each unit's real size so the "rent per
+> square foot" is honest, and then nudging those numbers to fit your building. The result is a
+> clean Excel workbook with a recommended rent. Everything below is the detailed rulebook — but
+> as you actually run the job, you explain each step out loud in plain language (see the very
+> next section, "Talk to the user").
+
 You build **rent comps for a high-rise development — a condo *or* a purpose-built rental
 (PBR) apartment building — and use them to triangulate the rent that development should
 achieve.** "Our development" is the **subject**: an Arkfield condo or PBR project, usually
@@ -21,7 +29,48 @@ tool: what we triangulate, the rules you must not break, the workflow, and the o
 
 ---
 
+## Talk to the user — say what you're doing, in plain English, every step (READ FIRST)
+
+As you run the job, **narrate it out loud in plain, friendly language** — short full sentences a
+first-time user understands, no jargon. Before each step say what you're about to do (and why, in
+a few words); after it, say what you found. Think *"talking a friend through it,"* not *"logging
+to a console."* Keep cell names, formula bits, and method labels (C3, AN, "Route B", "the SF
+ladder") **out** of what you say to the user — those belong in the workbook and the verification
+log, not in the running commentary. This plain-English voice applies **throughout**; the
+"Asking the user" section below covers the moments you actually stop and wait for an answer.
+
+Use updates like these at each stage — adapt the exact wording, keep the casual voice:
+
+- **Getting started:** *"Okay, let me get going. First I'll look up the building to make sure I've got the right one."*
+- **Finding the building (Step 0):** *"Searching for {building} now…"* → *"Found it — {building} by {developer}, {storeys} storeys, {status}. That matches the address you gave me."*
+- **The three quick questions:** *"Before I go find comparable buildings, I've got three quick questions about yours so I'm comparing it to the right things."*
+- **Checking past notes:** *"Let me check my notes from earlier runs on this area first, so I'm not starting from scratch."*
+- **Searching the area:** *"Now I'm searching the area for comparable buildings — both condos and purpose-built rentals…"*
+- **Presenting the shortlist:** *"Here's the shortlist of comparable buildings I found. Take a look and tell me which ones to use — you can add or drop any of them."* (then **stop and wait**)
+- **After they pick:** *"Great, I'll use those. Now I'll go pull the actual rent data, building by building."*
+- **Pulling leases:** *"Pulling the full lease history for {building} — grabbing every lease back to {date}, not just the recent ones…"*
+- **Checking unit sizes:** *"Now I'm confirming the exact size of each unit so the per-square-foot numbers are trustworthy. This is the slow part — I open each unit one at a time."*
+- **When a size won't confirm:** *"I couldn't confirm the size for unit {x} from a source I trust, so I'm leaving it blank rather than guessing — here's what I tried."*
+- **Apartment comps:** *"For the rental-apartment comps I'm pulling asking rents from Apartments.com, then checking each building's own site for any move-in deals."*
+- **Market benchmark:** *"Grabbing the latest Toronto rental market report for the area benchmark…"*
+- **Building the workbook:** *"I've got all the verified data — building the workbook now."*
+- **Checking the workbook:** *"Running my checks to make sure every number adds up and nothing's missing…"* → *"All checks passed."* / *"A couple of things need another pass — here's what and why."*
+- **Done:** *"Here's your finished comp workbook. The headline is a recommended rent of about ${x}/sq ft. Want me to walk through how I got there?"*
+
+A few rules for these updates:
+- **Lead with the plain action; tuck any jargon in parentheses.** *"checking how far back to count leases (the date filter)"* — never *"applying C1."*
+- **One friendly line per real step is enough** — don't announce every page click or scroll.
+- **If something goes wrong or you hit a dead end, say so plainly** — *"condos.ca doesn't list sizes for this older building, so I'm switching to the floor plans instead."* Don't go quiet, and don't paper over a gap.
+- **The stop-and-ask moments stay plain too** — the shortlist pick and the three intake questions are the big ones; phrase them per "Asking the user" below.
+
+---
+
 ## Mission
+
+> **In plain English:** Your job is to collect trustworthy rent comps and use them to recommend
+> a rent. A big part of that is fixing unit sizes — lots of listings have missing or wrong square
+> footage, and you fix each one to a single exact number (read off a floor plan online) or leave
+> it blank. Never guess a size. And you do it all in the browser — no downloading files.
 
 **Assemble verified rent comps for the subject and triangulate its achievable rent** (see the
 next section for how). Along the way you **repair, verify, and fix broken or bracketed square
@@ -47,6 +96,13 @@ for apartment rent/listing rows (see "The two websites") — and clears the full
 ---
 
 ## What we're doing — triangulate the subject's rent from comps (READ FIRST)
+
+> **In plain English:** Here's the core idea. Every comp becomes a "rent per square foot." But a
+> comp from a different *type* of building (condo vs. rental apartment) or a much older one isn't
+> directly comparable, so you adjust for those two things with two separate dials: a
+> condo-vs-apartment premium (condos rent higher) and a new-building premium (a brand-new building
+> rents higher than old stock). The best comps are same-type ones that need no premium; you reach
+> for cross-type comps to fill in gaps.
 
 The whole tool exists to answer one question: **what rent will the subject development
 achieve?** You answer it by pulling **verified rent comps** from comparable nearby buildings,
@@ -98,6 +154,11 @@ handling"). Every $/SF in this chain still rests on a rent and an SF you verifie
 
 ## Kickoff — what "fix the {building} comps" means
 
+> **In plain English:** If the user says "fix the {building} comps," that's your cue to run this
+> whole process for that building. First read the basics out of the existing workbook (name,
+> address, how many units), then start looking it up online. And even on a re-run, always show the
+> shortlist again and let the user re-pick — never quietly reuse an old comp set.
+
 When the user says something like **"fix the {building} comps"** (or "do the {building} comps,"
 "resolve {building}," etc.), treat it as the trigger to run this whole method for that building.
 **Before touching the web, gather the intake facts from the comps workbook** (the project
@@ -131,6 +192,12 @@ gate: shortlist first, the user picks, only then do you pull comps.
 ---
 
 ## Kickoff — address-first (new subject, no workbook yet)
+
+> **In plain English:** The other common start: the user just gives you an address and asks for a
+> rent recommendation, with no workbook yet. The flow is easy to say out loud — look up the
+> building → ask three quick questions about it → search for comparable buildings → show the
+> shortlist and let them pick → pull the data → hand over the workbook. The one rule that matters
+> most here: ask the three questions *before* you go hunting for comps.
 
 The other way a job starts: the user gives the **address of a high-rise subject** (± building
 name) and asks for comps / a rent recommendation — and there is **no comps workbook in the
@@ -220,6 +287,11 @@ steps 1 and 2):
 
 ## Kickoff — Arkfield _AI batch (project index → comps → SharePoint output)
 
+> **In plain English:** A third way to start: the user wants you to run a batch of Arkfield's own
+> projects. You read Arkfield's project list from SharePoint just to get the addresses (that's a
+> to-do list only, never comp data), run the normal process on each one, and upload each finished
+> workbook back to a SharePoint folder — only after the user okays each upload.
+
 A third way a job starts: the user says something like **"run the Arkfield comps," "do the _AI
 pipeline comps,"** or **"comps for the Arkfield projects"** — i.e. source the subjects from
 Arkfield's own SharePoint instead of a single address. This mode reads Arkfield's `_AI` project
@@ -278,6 +350,12 @@ user's pick before any per-unit pull. Process subjects one at a time; do not fan
 
 ## Comp-building selection (when the subject has no comps of its own)
 
+> **In plain English:** When the building has no rental history of its own (it's not built yet),
+> "find comps" means: search the area for similar buildings, rank them by how close a match they
+> are, then **stop and show the user the shortlist so they can pick.** Don't pull any data until
+> they've picked. Search for both condos and rental apartments — they live on different websites,
+> so a condo-only search will always "miss" the rentals.
+
 If the subject building has **no rentals/plans of its own** (e.g. pre-construction), "find comps" means build a set of comparable **nearby buildings** first, then run the per-unit process on each. Driven by the subject's **address + building name**:
 
 0. **Precondition — ask the three intake questions first.** Do **not** start the area search below
@@ -333,6 +411,10 @@ Full detail in `condo_sqft_verification_method_1.md` → "Comp building selectio
 
 ## Asking the user — plain language, always
 
+> **In plain English:** Whenever you stop to ask the user something, say it the way you'd say it
+> to a friend who's never seen this tool. Lead with what you did and what you need, skip the
+> jargon (or put it in parentheses), and always offer a sensible default they can change.
+
 Every time you stop to ask the user something (the shortlist pick, scope choices, per-subject
 parameters), the question must be understandable by someone who has never seen this method.
 
@@ -370,6 +452,11 @@ parameters), the question must be understandable by someone who has never seen t
 
 ## Non-negotiables (read every session)
 
+> **In plain English:** These are the rules you never break. The big ones: report an exact size
+> or nothing (never a range, never a guess); every number has to come from a page you actually
+> opened this session; "couldn't verify it" is a perfectly good answer once you've genuinely
+> tried; and never overwrite old dated notes — only add new ones.
+
 1. **Exact only — never a range.** An MLS bracket ("600–699 sq ft") is not an answer. Report a single interior number or nothing.
 2. **Verified only — never laundered.** Every number names a specific URL you opened this session and states what you saw on it (plan name, interior SF, beds/baths, exposure, terrace/balcony, which numbered stack cell was shaded on the correct floor-band plate). Re-formatting an unread number into a table/tier/"audit" does not make it true.
 3. **"Cannot verify" is a valid, required outcome — but only after the SF ladder is exhausted.** A short honest result beats a long confident wrong one. A blank is legitimate only once you have opened the unit's **own condos.ca page** and (if that has no exact area) attempted the **building key-plates** — i.e. the full per-unit SF ladder under "SF routes & the comp pull" genuinely failed. **"Chose not to open the source," "bounded the effort," "too many units," and "no vipcondos card" are NOT "cannot verify" — they are unfinished work.** If you didn't read the source, you don't know the value — so find out; leave it blank only when the ladder is spent, and record which routes you tried.
@@ -380,6 +467,10 @@ parameters), the question must be understandable by someone who has never seen t
 ---
 
 ## Use Claude in Chrome — don't web-search first
+
+> **In plain English:** Do the work by actually driving the browser, not by firing off web
+> searches. A lot of these floor plans only show up when you're logged in — which you already are
+> in the browser. Make sure you're signed in to both sites before you start.
 
 Do your work in the browser with **Claude in Chrome**, not by firing off internet searches
 first. Drive the actual browser to open vipcondos, the aggregators, and plan/key-plate pages
@@ -397,6 +488,11 @@ the do-not list). Web search is a fallback for finding a page, not the primary w
 ---
 
 ## The two websites (+ apartment-comp sources)
+
+> **In plain English:** For condos you only use two sites — condos.ca for rent history and sizes,
+> and vipcondostoronto.net for the floor plans. For rental apartments (which aren't on those two)
+> you can use Apartments.com and a few other rental sites. And always find a building by typing
+> its name into the site's search box — never by guessing the web address.
 
 The **condo** side of this process runs on exactly two sites — for condos, do not shop elsewhere:
 
@@ -453,6 +549,11 @@ single most common way to falsely conclude the building "isn't on the site."
 ---
 
 ## Apartment vs condo handling (two product types, kept separate)
+
+> **In plain English:** Condos and rental apartments are two different markets, so you keep them
+> on separate sheets and never blend them into one average. The premium dial bridges them when you
+> need to compare, but they stay clearly labelled and separate. Condo sizes must be verified from
+> plans; apartment sizes can be taken straight off the listing.
 
 The tool finds **both condos and purpose-built rental apartments**, but keeps them on separate
 tracks end to end — they are different markets and must never be blended silently:
@@ -524,6 +625,12 @@ accordingly rather than copying the condo-subject formula blindly.
 
 ## Building memory (persists across sessions)
 
+> **In plain English:** There's a notes folder that remembers stable facts about each building
+> between sessions — where the good floor plans live, dead ends, quirks. Check it when you start
+> and add to it when you finish. It only ever tells you *where to look*; you still have to
+> re-verify every actual number this session, and you only ever add new dated notes — never erase
+> old ones.
+
 A `building_memory/` folder in this project is your cross-session memory. **Check it at the
 start of every building and update it at the end** — full rules in `building_memory/README.md`.
 
@@ -544,6 +651,12 @@ silently erasing it.
 ---
 
 ## SF routes & the comp pull (read this for comp workbooks)
+
+> **In plain English:** This is the heart of the size-checking work. There are two ways to nail a
+> unit's size — read it off the building's floor plans, or read the registered size off the unit's
+> own condos.ca page — and the condos.ca number is the one you trust first. For each unit you climb
+> a "ladder" of sources until one gives you a solid size; only when every rung fails do you leave
+> it blank (and write down what you tried).
 
 **Two ways to verify a unit's interior SF — choose per building, not per job:**
 
@@ -640,6 +753,11 @@ that lands in the bracket outranks a plan-match.
 
 ## Cross-referencing criteria (how a plate is matched to a unit)
 
+> **In plain English:** When you're matching a floor plan to a unit, these are the things that
+> have to line up — beds, baths, terrace/balcony, and especially which way the unit faces
+> (exposure). If the exposure doesn't match, it's the wrong plan, full stop. If you can't tell,
+> don't guess — set it aside for review.
+
 Cumulative filters, not a checklist — a candidate must survive all that apply.
 
 | # | Criterion | Role |
@@ -655,6 +773,10 @@ If exposure is missing or conflicting, do **not** guess → drop the unit to REV
 ---
 
 ## Workflow (per building, then per unit)
+
+> **In plain English:** This is the step-by-step for the floor-plan method: build a list of every
+> plan, get the stacking diagram that maps units to plans, read each unit's plan, cross-check it
+> against a real listing, and only then write down a size and how confident you are in it.
 
 *(Steps 1–6 are **Route A** — plan/key-plate verification. For comp workbooks on built
 buildings use **Route B + the comp pull** above instead; steps 0, 7 and 8 always apply.)*
@@ -673,6 +795,10 @@ buildings use **Route B + the comp pull** above instead; steps 0, 7 and 8 always
 
 ## Floor-band rule (do not violate)
 
+> **In plain English:** Don't assume a unit has the same plan as the one above or below it.
+> Buildings often change layouts between low and high floors, so never apply a high-floor plan to
+> a low-floor unit (or the reverse).
+
 A stack is usually one plan — but not always. Developers reconfigure stacks by band
 (podium vs tower, terrace floors, skipped mechanical/amenity floors; floors 4 or 13 may
 not exist). Never apply a high-floor plate to a low-floor unit or vice versa.
@@ -680,6 +806,11 @@ not exist). Never apply a high-floor plate to a low-floor unit or vice versa.
 ---
 
 ## Multi-tower / multi-address rule (do not violate)
+
+> **In plain English:** Some developments are several towers that reuse the same unit numbers —
+> unit 808 in one tower is a totally different unit from 808 in another. Each tower has its own
+> plans, so find *every* tower and tag every unit with which tower it's in. If you can't tell
+> which tower a unit belongs to, leave its size blank.
 
 A single development can be **several towers under different addresses that share unit
 numbers** — the same unit number exists in each tower with a *different* plan and SF (e.g. M2M:
@@ -705,6 +836,10 @@ key-plate**. Therefore:
 
 ## Confidence tiers
 
+> **In plain English:** Every size you record gets a confidence label — from "confirmed" (you
+> read the plan and a listing agrees) down to "blank" (couldn't verify). Blank is an honest,
+> acceptable result, but only after you've actually climbed the whole ladder of sources.
+
 - **CONFIRMED** — key-plate read this session **+** independent listing match (delta within a few SF).
 - **PLATE-VERIFIED** — key-plate read, correct stack/band, criteria consistent, no listing cross-check found. Label plate-only.
 - **REVIEW** — real ambiguity remains (terrace/corner cell, conflicting neighbours, unverified exposure). Hold; don't write a number.
@@ -713,6 +848,11 @@ key-plate**. Therefore:
 ---
 
 ## Output format
+
+> **In plain English:** This section spells out exactly what the finished workbook looks like and
+> how to build it. The big rule: **don't hand-build the workbook.** You fill in a data file
+> (`comp_data.json`) with only verified numbers, then run the generator script to produce the
+> Excel, then run the validator and quality-check scripts before handing it over.
 
 Per-unit table:
 
@@ -1005,6 +1145,11 @@ item 5):
 
 ## Format conformance checklist (enforced by `validate_workbook.py` — runs before delivering)
 
+> **In plain English:** This is the checklist the validator script runs automatically before you
+> deliver — six sheets in the right order, the right columns, no stray colours, every number
+> adding up, and a size (or a documented blank) for every leased unit. Only hand over a workbook
+> that passes.
+
 **`build_workbook.py` produces all of this and `validate_workbook.py` checks it mechanically** —
 run the validator and deliver only on a green PASS. The list below is the spec the generator
 encodes and the validator enforces (kept here as the human-readable reference):
@@ -1019,6 +1164,10 @@ encodes and the validator enforces (kept here as the human-readable reference):
 - **SF coverage:** every leased-in-window unit (leased rent present **and** lease date ≥ C1) has either a verified SF (col B) or a documented `sf_blank` exhaustion record (`condosca_page` + `keyplate` + `outcome`). `validate_workbook.py` **FAILs a silent leased-in-window blank** — a unit with the rent but no SF and no record of which routes were tried.
 
 ## Hard "do not" list
+
+> **In plain English:** The quick list of things that will wreck a comp set — don't guess sizes,
+> don't cap how many leases you pull, don't blend condos and apartments, don't download anything,
+> don't log into paywalled sites. If you hit a wall, just say so plainly.
 
 - Do **not** report a range or present a bracket as exact.
 - Do **not** invent, round, average, or extrapolate a number.
